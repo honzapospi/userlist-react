@@ -1,56 +1,37 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getUsers, deleteUser } from './api';
 import { Link } from 'react-router-dom';
 
-class UserList extends Component {
+const UserList = () => {
 
-    exist = true;
+    let exist = true;
+    let timer;
 
-    state = {
-        users: null,
-        error: null
-    }
+    const [users, setUsers] = useState(null);
+    const [error, setError] = useState(null);
 
-    render() {
-        return (
-            <table className="table table-dark">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Surname</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {this.renderBody()}
-                </tbody>
-            </table>
-        )
-    }
-
-    renderBody() {
-        if (this.state.error) {
+    const renderBody = () => {
+        if (error) {
             return <tr>
-                <td colSpan="4">{this.state.error.message}</td>
+                <td colSpan="4">{error.message}</td>
             </tr>
-        } else if (this.state.users === null) {
+        } else if (users === null) {
             return <tr>
                 <td colSpan="4">Loading</td>
             </tr>
-        } else if (this.state.users.length === 0) {
+        } else if (users.length === 0) {
             return <tr>
                 <td colSpan="4">No data to display</td>
             </tr>
         } else {
-            return this.state.users.map(user => {
+            return users.map(user => {
                 return (
                     <tr key={user.id}>
                         <td>{user.id}</td>
                         <td>{user.name}</td>
                         <td>{user.surname}</td>
                         <td>
-                            <button onClick={() => this.handleDelete(user.id)}>Delete</button>
+                            <button onClick={() => handleDelete(user.id)}>Delete</button>
                             <Link className="btn btn-primary" to={'/edit/' + user.id}>Edit</Link>
                         </td>
                     </tr>
@@ -59,7 +40,7 @@ class UserList extends Component {
         }
     }
 
-    handleDelete = (id) => {
+    const handleDelete = (id) => {
         // this.setState({
         //     users: this.state.users.filter(user => user.id !== id)
         // });
@@ -67,44 +48,59 @@ class UserList extends Component {
             if (response.data.message !== 'User has been deleted.') {
                 alert('Delete Error');
             } else {
-                this.fetchUsers();
+                fetchUsers();
             }
         }).catch(errro => {
             alert('Delete Error');
         })
     }
 
-    fetchUsers = () => {
+    const fetchUsers = () => {
         getUsers().then(response => {
-            if (this.exist) {
-                this.setState({
-                    error: null,
-                    users: response.data
-                });
+            if (exist) {
+                setUsers(response.data);
+                setError(null);
             }
         }).catch(error => {
-            if (this.exist) {
-                this.setState({
-                    error: error,
-                    users: null
-                });
+            if (exist) {
+                setError(error);
             }
         })
     }
 
-    componentDidMount() {
-        this.fetchUsers();
-        this.timer = setInterval(() => {
-            this.fetchUsers();
+    // componentDidMount
+    useEffect(() => {
+        fetchUsers();
+        console.log('Creating interval');
+        timer = setInterval(() => {
+            fetchUsers();
         }, 5000);
-    }
+    }, []);
 
-    componentWillUnmount() {
-        this.exist = false;
-        clearInterval(this.timer);
-    }
+    // componentWinUnmount
+    useEffect(() => {
+        return () => {
+            exist = false;
+            clearInterval(timer);
+        }
+    });
 
+
+    return (
+        <table className="table table-dark">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {renderBody()}
+            </tbody>
+        </table>
+    )
 }
-
 
 export default UserList;

@@ -5,7 +5,7 @@ import Menu from './Menu';
 import { Route } from 'react-router-dom';
 
 
-function App() {
+const App = () => {
   return (
     <div>
       <Menu />
