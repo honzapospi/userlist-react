@@ -1,17 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { getUsers, deleteUser } from './api';
 import { Link } from 'react-router-dom';
 import ThemeContext from './ThemeContext';
+import { connect } from 'react-redux';
 
-const UserList = () => {
+const UserList = ({ users, error }) => {
 
     const { theme } = useContext(ThemeContext);
 
     let exist = true;
     let timer;
-
-    const [users, setUsers] = useState(null);
-    const [error, setError] = useState(null);
 
     const renderBody = () => {
         if (error) {
@@ -34,7 +32,7 @@ const UserList = () => {
                         <td>{user.name}</td>
                         <td>{user.surname}</td>
                         <td>
-                            <button onClick={() => handleDelete(user.id)}>Delete</button>
+                            <button onClick={() => { }}>Delete</button>
                             <Link className="btn btn-primary" to={'/edit/' + user.id}>Edit</Link>
                         </td>
                     </tr>
@@ -42,52 +40,6 @@ const UserList = () => {
             });
         }
     }
-
-    const handleDelete = (id) => {
-        // this.setState({
-        //     users: this.state.users.filter(user => user.id !== id)
-        // });
-        deleteUser(id).then(response => {
-            if (response.data.message !== 'User has been deleted.') {
-                alert('Delete Error');
-            } else {
-                fetchUsers();
-            }
-        }).catch(errro => {
-            alert('Delete Error');
-        })
-    }
-
-    const fetchUsers = () => {
-        getUsers().then(response => {
-            if (exist) {
-                setUsers(response.data);
-                setError(null);
-            }
-        }).catch(error => {
-            if (exist) {
-                setError(error);
-            }
-        })
-    }
-
-    // componentDidMount
-    useEffect(() => {
-        fetchUsers();
-        console.log('Creating interval');
-        timer = setInterval(() => {
-            fetchUsers();
-        }, 5000);
-    }, []);
-
-    // componentWinUnmount
-    useEffect(() => {
-        return () => {
-            exist = false;
-            clearInterval(timer);
-        }
-    });
-
 
     return (
         <table className={`table table-${theme}`}>
@@ -106,4 +58,11 @@ const UserList = () => {
     )
 }
 
-export default UserList;
+const mapStateToProps = (state) => {
+    return {
+        users: state.users.list,
+        error: state.users.error
+    }
+}
+
+export default connect(mapStateToProps)(UserList);
