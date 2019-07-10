@@ -1,10 +1,10 @@
 import React, { useEffect, useContext } from 'react';
-import { getUsers, deleteUser } from './api';
 import { Link } from 'react-router-dom';
 import ThemeContext from './ThemeContext';
 import { connect } from 'react-redux';
+import { actionDeleteUser } from './redux/userActions';
 
-const UserList = ({ users, error }) => {
+const UserList = ({ users, error, actionDeleteUser }) => {
 
     const { theme } = useContext(ThemeContext);
 
@@ -32,7 +32,7 @@ const UserList = ({ users, error }) => {
                         <td>{user.name}</td>
                         <td>{user.surname}</td>
                         <td>
-                            <button onClick={() => { }}>Delete</button>
+                            <button onClick={() => actionDeleteUser(user.id)}>Delete</button>
                             <Link className="btn btn-primary" to={'/edit/' + user.id}>Edit</Link>
                         </td>
                     </tr>
@@ -65,4 +65,4 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(UserList);
+export default connect(mapStateToProps, { actionDeleteUser })(UserList);

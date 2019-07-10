@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { addUser, updateUser, getUser } from './api';
+import { connect } from 'react-redux';
+import { actionAddUser, actionUpdateUser } from './redux/userActions';
 
-const UserForm = (props) => {
+const UserForm = ({ match, actionAddUser, history, actionUpdateUser, users }) => {
 
-    const id = props.match.params.id
+    const id = +match.params.id
 
     const [user, setUser] = useState({ name: '', surname: '' });
 
     const nameRef = useRef();
+
+    if (id && !user.id) {
+        const u = users.find(user => user.id === id);
+        if (u) {
+            setUser(u);
+        } else {
+            console.log(users);
+            alert('404 - page not found');
+        }
+    }
 
     const handleChangeInput = (e) => {
         setUser({
@@ -22,35 +33,42 @@ const UserForm = (props) => {
 
     const formSubmit = () => {
         if (id) {
-            updateUser(id, user).then(response => {
-                if (response.data.message === "User has been updated.") {
-                    props.history.push('/');
-                } else {
-                    alert('Save error');
-                }
-            }).catch(error => {
-                alert('Save error');
-            })
+            actionUpdateUser(id, user);
         } else {
-            addUser(user).then(resposne => {
-                if (resposne.status !== 201) {
-                    alert('Save error');
-                } else {
-                    props.history.push('/');
-                }
-            }).catch(err => {
-                alert('Save error');
-            })
+            actionAddUser(user);
         }
+        history.push('/');
+
+        // if (id) {
+        //     updateUser(id, user).then(response => {
+        //         if (response.data.message === "User has been updated.") {
+        //             props.history.push('/');
+        //         } else {
+        //             alert('Save error');
+        //         }
+        //     }).catch(error => {
+        //         alert('Save error');
+        //     })
+        // } else {
+        //     addUser(user).then(resposne => {
+        //         if (resposne.status !== 201) {
+        //             alert('Save error');
+        //         } else {
+        //             props.history.push('/');
+        //         }
+        //     }).catch(err => {
+        //         alert('Save error');
+        //     })
+        // }
     }
 
     // copomponentDidMount
     useEffect(() => {
         nameRef.current.focus();
         if (id) {
-            getUser(id).then(response => {
-                setUser(response.data);
-            })
+            // getUser(id).then(response => {
+            //     setUser(response.data);
+            // })
         }
     }, [])
 
@@ -77,4 +95,13 @@ const UserForm = (props) => {
     )
 }
 
-export default UserForm;
+const mapStateToProps = (state) => {
+    return {
+        users: state.users.list
+    }
+}
+
+export default connect(mapStateToProps, {
+    actionAddUser,
+    actionUpdateUser
+})(UserForm);
