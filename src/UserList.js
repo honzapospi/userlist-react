@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getUsers, deleteUser } from './api';
 import { Link } from 'react-router-dom';
+import ThemeContext from './ThemeContext';
 
 const UserList = () => {
+
+    const { theme } = useContext(ThemeContext);
 
     let exist = true;
     let timer;
@@ -87,7 +90,7 @@ const UserList = () => {
 
 
     return (
-        <table className="table table-dark">
+        <table className={`table table-${theme}`}>
             <thead>
                 <tr>
                     <th>ID</th>
